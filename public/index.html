@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <script>
+        /* Kept so old links and bookmarks still work: sends you to the right page. */
+        (function () {
+            var token = localStorage.getItem("token");
+            var role = localStorage.getItem("role");
+            location.replace(token ? (role === "admin" ? "admin.html" : "home.html") : "login.html");
+        })();
+    </script>
+    <noscript><meta http-equiv="refresh" content="0; url=login.html"></noscript>
+</head>
+<body style="background:#0F1B33"></body>
+</html>

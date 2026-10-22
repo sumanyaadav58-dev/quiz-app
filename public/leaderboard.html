@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | Quiz App</title>
+    <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");</script>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+<header id="topnav"></header>
+
+<main class="page">
+    <div class="page-head">
+        <div>
+            <h1>Leaderboard</h1>
+            <p id="lbSub">Best attempt per candidate. Ties go to the faster time.</p>
+        </div>
+        <div class="toolbar">
+            <select class="input" id="quizSelect" aria-label="Choose examination" style="min-width:230px">
+                <option value="">All examinations (overall)</option>
+            </select>
+        </div>
+    </div>
+
+    <section class="podium" id="podium" aria-label="Top three"></section>
+    <div id="meCard"></div>
+
+    <section class="panel panel--pad">
+        <div class="panel__head">
+            <div><h3>Rankings</h3><p id="lbCount"></p></div>
+            <div class="input-wrap" style="min-width:220px">
+                <i class="bi bi-search"></i>
+                <input class="input" id="lbSearch" type="search" placeholder="Find a candidate" aria-label="Find a candidate" style="min-height:40px">
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="table table--stack">
+                <thead>
+                    <tr>
+                        <th>Rank</th><th>Candidate</th><th class="t-right">Score</th><th class="t-right">Percentage</th>
+                        <th>Correct / Incorrect / Unanswered</th><th class="t-right">Time</th>
+                    </tr>
+                </thead>
+                <tbody class="lb-rows" id="lbBody">
+                    <tr><td colspan="6"><div class="skeleton" style="height:120px"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/leaderboard.js"></script>
+</body>
+</html>

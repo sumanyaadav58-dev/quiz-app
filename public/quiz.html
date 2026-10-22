@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Examination | Quiz App</title>
+    <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");</script>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/exam.css">
+    <link rel="stylesheet" href="css/proctor.css">
+</head>
+<body class="exam-body">
+
+<!-- ================= LOADING ================= -->
+<div id="loading" class="loading-screen">
+    <div><div class="spinner"></div>Loading examination</div>
+</div>
+
+<!-- ================= INSTRUCTIONS ================= -->
+<div id="introView" class="hidden">
+    <header id="topnav"></header>
+
+    <main class="intro">
+        <a class="btn btn--ghost btn--sm" href="home.html" style="margin-bottom:12px"><i class="bi bi-arrow-left"></i> Back to dashboard</a>
+
+        <section class="intro__head panel">
+            <div class="exam-card__cat" id="introCat"></div>
+            <h1 id="introTitle"></h1>
+            <p id="introDesc"></p>
+            <div class="intro__meta" id="introMeta"></div>
+        </section>
+
+        <div id="introAlert"></div>
+
+        <section class="intro__cols">
+            <div class="panel">
+                <h3>Examination instructions</h3>
+                <ol class="steps" id="introSteps"></ol>
+            </div>
+
+            <div class="panel">
+                <h3>Question palette</h3>
+                <p class="muted" style="font-size:.9rem;margin-top:4px">Every question shows its status on the right-hand panel.</p>
+                <div class="legend-grid" style="margin-top:14px">
+                    <div class="legend-item"><span class="pbubble">1</span>Not visited</div>
+                    <div class="legend-item"><span class="pbubble st-na">2</span>Not answered</div>
+                    <div class="legend-item"><span class="pbubble st-a">3</span>Answered</div>
+                    <div class="legend-item"><span class="pbubble st-m">4</span>Marked for review</div>
+                    <div class="legend-item wide"><span class="pbubble st-am">5</span>Answered and marked for review (counts as answered)</div>
+                </div>
+
+                <h3 style="margin-top:20px">Keyboard shortcuts</h3>
+                <div class="keys">
+                    <div><span>Choose an option</span><span><kbd>A</kbd> to <kbd>D</kbd> or <kbd>1</kbd> to <kbd>4</kbd></span></div>
+                    <div><span>Previous / next question</span><span><kbd>&larr;</kbd> <kbd>&rarr;</kbd></span></div>
+                    <div><span>Mark for review</span><span><kbd>M</kbd></span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE PROCTORING notice (shown to candidates before they start) -->
+        <section class="panel proctor-note hidden" id="proctorNote" style="margin-bottom:16px">
+            <span class="proctor-note__icon"><i class="bi bi-camera-video"></i></span>
+            <div>
+                <h3>This examination is proctored</h3>
+                <p>When you press Start, your browser will ask to use your camera and microphone. Both are required.</p>
+                <ul>
+                    <li>An examination administrator can watch and listen live while you sit the paper.</li>
+                    <li>You'll see your own camera in the corner, and a red <b>LIVE</b> label whenever someone is watching.</li>
+                    <li>Nothing is recorded or saved. Your camera and microphone turn off as soon as you submit.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="intro__start panel">
+            <label class="agree">
+                <input type="checkbox" id="agree">
+                <span>I have read the instructions. I understand the timer starts when I begin and the examination submits itself when time runs out.</span>
+            </label>
+            <button class="btn btn--primary btn--lg" id="startBtn" disabled><i class="bi bi-play-fill btn__icon"></i> Start examination</button>
+        </section>
+    </main>
+</div>
+
+<!-- ================= EXAM ================= -->
+<div id="examView" class="hidden">
+
+    <header class="xbar">
+        <span class="brand"><span class="brand__mark"></span></span>
+        <div class="xbar__title">
+            <strong id="xTitle"></strong>
+            <span id="xSub"></span>
+        </div>
+
+        <button class="btn btn--sm palette-toggle" id="paletteToggle" type="button" aria-controls="xpanel" aria-expanded="false">
+            <i class="bi bi-grid-3x3-gap"></i> <span id="paletteToggleText" class="num">1/1</span>
+        </button>
+
+        <div class="timer" id="timer" role="timer" aria-live="off">
+            <i class="bi bi-stopwatch"></i>
+            <div>
+                <div class="timer__label">TIME LEFT</div>
+                <div class="timer__value" id="timerValue">--:--</div>
+            </div>
+        </div>
+
+        <div class="xbar__who">
+            <span class="avatar" id="xAvatar"></span>
+            <div><strong id="xName"></strong><span>Candidate</span></div>
+        </div>
+    </header>
+    <div class="xtime" id="xtime"><span></span></div>
+
+    <!-- LIVE PROCTORING: your own camera preview -->
+    <aside class="pcam hidden" id="pcam" aria-label="Your camera and microphone">
+        <div class="pcam__video">
+            <video id="pcamVideo" autoplay playsinline muted></video>
+            <span class="pcam__live hidden" id="pcamLive" title="An administrator is watching live">LIVE</span>
+            <div class="pcam__off hidden" id="pcamOff"><div><i class="bi bi-camera-video-off"></i>Camera is off</div></div>
+            <button class="pcam__toggle" id="pcamToggle" type="button" aria-label="Hide camera details"><i class="bi bi-arrows-angle-contract"></i></button>
+        </div>
+        <div class="pcam__body">
+            <div class="pcam__row"><span><i class="bi bi-camera-video"></i> Camera</span><span class="sdot" id="pcamCam">...</span></div>
+            <div class="pcam__row"><span><i class="bi bi-mic"></i> Microphone</span><span class="sdot" id="pcamMic">...</span></div>
+            <div class="pcam__level" aria-hidden="true"><span id="pcamLevel"></span></div>
+            <div class="pcam__row"><span><i class="bi bi-broadcast"></i> Link</span><span class="sdot" id="pcamConn">...</span></div>
+            <div class="pcam__actions"><button class="btn btn--sm btn--block hidden" id="pcamRetry" type="button"><i class="bi bi-arrow-clockwise"></i> Turn camera back on</button></div>
+        </div>
+    </aside>
+
+    <div class="sr-only" aria-live="assertive" id="srAnnounce"></div>
+
+    <div class="xlayout">
+        <section class="xq" aria-live="polite">
+            <div class="xq__head">
+                <div class="xq__num" id="qNum"></div>
+                <span class="badge" id="qMarks"></span>
+                <span class="badge" id="qDiff"></span>
+                <span class="save-state" id="saveState"><i class="bi bi-cloud-check"></i> Saved</span>
+            </div>
+
+            <div class="xq__stage">
+                <article class="xq__card" id="qCard"></article>
+            </div>
+
+            <div class="xactions">
+                <button class="btn btn--mark" id="markBtn" type="button"><i class="bi bi-bookmark-star"></i> <span class="lbl-long">Mark for review &amp; next</span><span class="lbl-short">Review</span></button>
+                <button class="btn" id="clearBtn" type="button"><i class="bi bi-eraser"></i> <span class="lbl-long">Clear response</span><span class="lbl-short">Clear</span></button>
+                <span class="xactions__spacer"></span>
+                <button class="btn" id="prevBtn" type="button"><i class="bi bi-chevron-left"></i> <span class="lbl-long">Previous</span><span class="lbl-short">Back</span></button>
+                <button class="btn btn--success" id="nextBtn" type="button"><span class="lbl-long">Save &amp; next</span><span class="lbl-short">Save &amp; next</span> <i class="bi bi-chevron-right"></i></button>
+            </div>
+        </section>
+
+        <div class="xbackdrop" id="xbackdrop"></div>
+
+        <aside class="xpanel" id="xpanel" aria-label="Question palette">
+            <button class="btn btn--ghost btn--icon btn--sm xpanel__close" id="paletteClose" type="button" aria-label="Close palette"><i class="bi bi-x-lg"></i></button>
+            <div class="xcandidate">
+                <span class="avatar" id="pAvatar"></span>
+                <div><strong id="pName"></strong><span id="pEmail"></span></div>
+            </div>
+
+            <div class="xprogress"><span><b id="answeredCount">0</b> of <b id="totalCount">0</b> answered</span><div class="meter"><span id="progressBar"></span></div><b id="progressPct">0%</b></div>
+
+            <h3>Status</h3>
+            <div class="legend-grid" id="legend"></div>
+
+            <h3>Questions</h3>
+            <div class="palette" id="palette" role="list"></div>
+
+            <button class="btn btn--primary btn--block btn--lg xpanel__submit" id="submitBtn" type="button"><i class="bi bi-send-check"></i> Submit examination</button>
+        </aside>
+    </div>
+</div>
+
+<!-- ================= SUBMIT CONFIRM ================= -->
+<div class="modal" id="submitModal" role="dialog" aria-modal="true" aria-labelledby="submitTitle" aria-hidden="true">
+    <div class="modal__box" style="width:min(460px,100%)">
+        <div class="modal__head">
+            <div>
+                <h3 id="submitTitle">Submit your examination?</h3>
+                <p>You can't change any answers after this.</p>
+            </div>
+        </div>
+        <div class="modal__body">
+            <table class="submit-summary" id="submitSummary"></table>
+            <div id="submitWarn"></div>
+            <p class="faint" style="font-size:.84rem;margin-top:12px">Time left: <b class="num" id="submitTimeLeft"></b></p>
+        </div>
+        <div class="modal__foot">
+            <button class="btn" type="button" data-close-modal>Back to examination</button>
+            <button class="btn btn--primary" type="button" id="confirmSubmit"><i class="bi bi-send-check btn__icon"></i> Submit now</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= LOCK (time up / submitting) ================= -->
+<div class="lock hidden" id="lock" role="alertdialog" aria-live="assertive">
+    <div class="lock__box">
+        <div class="spinner"></div>
+        <h2 id="lockTitle">Submitting your answers</h2>
+        <p id="lockText">Please don't close this page.</p>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/core.js"></script>
+<script src="js/proctor-candidate.js"></script>
+<script src="js/quiz.js"></script>
+</body>
+</html>

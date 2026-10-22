@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My performance | Quiz App</title>
+    <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");</script>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+<header id="topnav"></header>
+
+<main class="page">
+    <div class="page-head">
+        <div>
+            <h1>My performance</h1>
+            <p>Every examination you've submitted, and how you're trending.</p>
+        </div>
+    </div>
+
+    <!-- PROFILE PHOTO -->
+    <section class="panel panel--pad profile-hero" id="account">
+        <div class="profile-hero__photo">
+            <span class="avatar avatar--xl" id="heroAvatar"></span>
+            <button class="profile-hero__cam" type="button" id="photoQuick" aria-label="Change profile photo" title="Change photo"><i class="bi bi-camera"></i></button>
+        </div>
+        <div class="profile-hero__info">
+            <h2 id="heroName">&nbsp;</h2>
+            <p id="heroEmail" class="muted"></p>
+            <div class="profile-hero__chips" id="heroChips"></div>
+        </div>
+        <div class="profile-hero__actions">
+            <button class="btn btn--primary btn--sm" type="button" id="photoUpload"><i class="bi bi-upload"></i> Upload photo</button>
+            <button class="btn btn--sm hidden" type="button" id="photoEdit"><i class="bi bi-crop"></i> Edit photo</button>
+            <button class="btn btn--sm hidden" type="button" id="photoGoogle"><i class="bi bi-google"></i> Use Google photo</button>
+            <button class="btn btn--ghost btn--sm hidden" type="button" id="photoRemove"><i class="bi bi-trash"></i> Remove</button>
+            <input type="file" id="photoFile" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden">
+        </div>
+    </section>
+
+    <section class="stats" id="stats">
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+    </section>
+
+    <section class="profile-grid">
+        <div class="panel panel--pad">
+            <div class="panel__head"><div><h3>Score trend</h3><p>Your last 12 attempts, oldest to newest.</p></div></div>
+            <div id="trend"><div class="skeleton" style="height:170px"></div></div>
+        </div>
+        <div class="panel panel--pad">
+            <div class="panel__head"><div><h3>By subject</h3><p>Average and best percentage.</p></div></div>
+            <div class="bars" id="subjects"><div class="skeleton" style="height:120px"></div></div>
+        </div>
+    </section>
+
+    <section class="panel panel--pad" style="margin-bottom:20px">
+        <div class="panel__head"><div><h3>Attempt history</h3><p id="histCount"></p></div></div>
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Examination</th><th class="t-right">Score</th><th class="t-right">Percentage</th><th>Result</th><th class="t-right">Time</th><th>Submitted</th><th></th></tr></thead>
+                <tbody id="history"><tr><td colspan="7"><div class="skeleton" style="height:80px"></div></td></tr></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="profile-grid">
+        <div class="panel panel--pad">
+            <div class="panel__head"><div><h3>Account</h3><p>Your details as they appear on results.</p></div></div>
+            <form id="nameForm" class="row" novalidate style="align-items:end">
+                <div class="field" style="margin:0">
+                    <label class="field__label" for="nameInput">Full name</label>
+                    <input class="input" id="nameInput" maxlength="60" autocomplete="name">
+                </div>
+                <div class="field" style="margin:0">
+                    <button class="btn btn--primary" id="nameBtn" type="submit"><i class="bi bi-check2 btn__icon"></i> Save name</button>
+                </div>
+            </form>
+            <div class="account" id="account2" style="margin-top:16px"></div>
+        </div>
+        <div class="panel panel--pad">
+            <div class="panel__head"><div><h3 id="pwTitle">Change password</h3><p>At least 8 characters with a letter and a number.</p></div></div>
+            <form id="pwForm" novalidate>
+                <div class="field" id="pwCurrentField"><label class="field__label" for="pwCurrent">Current password</label><input class="input" type="password" id="pwCurrent" autocomplete="current-password"></div>
+                <div class="field"><label class="field__label" for="pwNew">New password</label><input class="input" type="password" id="pwNew" autocomplete="new-password"></div>
+                <button class="btn btn--primary" id="pwBtn" type="submit"><i class="bi bi-shield-lock btn__icon"></i> Change password</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- CONNECTED ACCOUNTS -->
+    <section class="panel panel--pad" style="margin-bottom:20px" id="connections">
+        <div class="panel__head"><div><h3>Connected accounts</h3><p>Ways you can sign in to this account.</p></div></div>
+        <div class="connect-list" id="connectList"><div class="skeleton" style="height:120px"></div></div>
+    </section>
+</main>
+
+<!-- PHOTO EDITOR -->
+<div class="modal" id="photoModal" role="dialog" aria-modal="true" aria-labelledby="photoTitle" aria-hidden="true">
+    <div class="modal__box" style="width:min(460px,100%)">
+        <div class="modal__head">
+            <div><h3 id="photoTitle">Edit profile photo</h3><p>Drag to move. Use the slider or scroll to zoom.</p></div>
+            <button class="btn btn--ghost btn--icon modal-close" type="button" data-close-modal aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal__body">
+            <div class="cropper" id="cropper">
+                <canvas id="cropCanvas" width="560" height="560" aria-label="Photo preview. Drag to reposition."></canvas>
+                <div class="cropper__ring" aria-hidden="true"></div>
+            </div>
+            <div class="cropper__tools">
+                <i class="bi bi-zoom-out" aria-hidden="true"></i>
+                <input type="range" id="cropZoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom">
+                <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                <button class="btn btn--ghost btn--icon btn--sm" type="button" id="cropRotate" aria-label="Rotate 90 degrees" title="Rotate"><i class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <button class="btn btn--sm" type="button" id="cropOther" style="margin-top:6px"><i class="bi bi-image"></i> Choose a different photo</button>
+        </div>
+        <div class="modal__foot">
+            <button class="btn" type="button" data-close-modal>Cancel</button>
+            <button class="btn btn--primary" type="button" id="cropSave"><i class="bi bi-check2 btn__icon"></i> Save photo</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/social.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

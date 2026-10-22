@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin portal | Quiz App</title>
+    <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");</script>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/proctor.css">
+</head>
+<body class="admin-body is-guarding">
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="side" id="sidebar" aria-label="Admin navigation">
+    <a class="brand" href="admin.html#dashboard"><span class="brand__mark"></span><span>Quiz App</span></a>
+
+    <nav class="side__nav">
+        <a class="side__link" href="#dashboard" data-nav="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a class="side__link" href="#live" data-nav="live"><i class="bi bi-camera-video"></i> Live Exam Monitoring <span class="sdot sdot--warn hidden" id="navLiveDot" title="A candidate needs attention"></span><span class="count" id="navLive"></span></a>
+        <div class="side__label">Examinations</div>
+        <a class="side__link" href="#exams" data-nav="exams"><i class="bi bi-journal-text"></i> Examinations <span class="count" id="navExams"></span></a>
+        <a class="side__link" href="#bank" data-nav="bank"><i class="bi bi-collection"></i> Question bank <span class="count" id="navQuestions"></span></a>
+        <button class="side__link" type="button" id="navCreate"><i class="bi bi-plus-circle"></i> New examination</button>
+        <div class="side__label">People &amp; results</div>
+        <a class="side__link" href="#users" data-nav="users"><i class="bi bi-people"></i> Candidates <span class="count" id="navUsers"></span></a>
+        <a class="side__link" href="#results" data-nav="results"><i class="bi bi-clipboard-data"></i> Results</a>
+        <a class="side__link" href="#analytics" data-nav="analytics"><i class="bi bi-graph-up-arrow"></i> Analytics</a>
+        <a class="side__link" href="leaderboard.html"><i class="bi bi-trophy"></i> Leaderboard</a>
+    </nav>
+
+    <div class="side__foot">
+        <button class="side__link" type="button" data-toggle-theme><i data-theme-icon></i> Switch theme</button>
+        <button class="side__link" type="button" data-logout><i class="bi bi-box-arrow-right"></i> Log out</button>
+    </div>
+</aside>
+<div class="side-backdrop" id="sideBackdrop"></div>
+
+<!-- ================= MAIN ================= -->
+<main class="amain">
+    <header class="abar">
+        <button class="btn btn--ghost btn--icon abar__menu" type="button" id="menuBtn" aria-label="Open menu" aria-controls="sidebar"><i class="bi bi-list"></i></button>
+        <div class="abar__title">
+            <h1 id="pageTitle">Dashboard</h1>
+            <p id="pageSubtitle"></p>
+        </div>
+        <div class="abar__right">
+            <div id="liveBadge"></div>
+            <div class="topnav__user">
+                <span class="avatar" id="adminAvatar">A</span>
+                <div><strong id="adminName">Admin</strong><span>Administrator</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="acontent" id="view"></div>
+</main>
+
+<!-- ================= QUIZ EDITOR ================= -->
+<div class="modal modal--wide" id="quizModal" role="dialog" aria-modal="true" aria-labelledby="quizModalTitle" aria-hidden="true">
+    <form class="modal__box" id="quizForm" novalidate>
+        <div class="modal__head">
+            <div><h3 id="quizModalTitle">New examination</h3><p id="quizModalSub">Set it up, then add questions. It stays a draft until you publish.</p></div>
+            <button class="btn btn--ghost btn--icon modal-close" type="button" data-close-modal aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal__body">
+            <div id="quizFormError"></div>
+
+            <div class="fsection">
+                <div class="fsection__title">Basics</div>
+                <div class="field"><label class="field__label" for="fTitle">Title</label><input class="input" id="fTitle" maxlength="150" placeholder="e.g. AFCAT Mock Test 1" required></div>
+                <div class="field"><label class="field__label" for="fDesc">Description <span class="faint">Optional</span></label><textarea class="input" id="fDesc" maxlength="1000" style="min-height:70px" placeholder="One or two lines candidates see before starting"></textarea></div>
+                <div class="row">
+                    <div class="field"><label class="field__label" for="fCategory">Subject / category</label><input class="input" id="fCategory" list="categoryList" maxlength="60" placeholder="General"><datalist id="categoryList"></datalist></div>
+                    <div class="field"><label class="field__label">Difficulty</label>
+                        <div class="segmented" id="fDifficulty"><button type="button" data-v="Easy">Easy</button><button type="button" data-v="Medium" class="is-active">Medium</button><button type="button" data-v="Hard">Hard</button></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fsection">
+                <div class="fsection__title">Timer</div>
+                <div class="field">
+                    <label class="field__label" for="fDuration">Duration in minutes</label>
+                    <div class="presets" id="durationPresets">
+                        <button type="button" class="chip" data-min="10">10 min</button>
+                        <button type="button" class="chip" data-min="20">20 min</button>
+                        <button type="button" class="chip" data-min="30">30 min</button>
+                        <button type="button" class="chip" data-min="60">60 min</button>
+                        <button type="button" class="chip" data-min="90">90 min</button>
+                        <input class="input num" type="number" id="fDuration" min="1" max="600" value="30" aria-label="Custom duration in minutes">
+                    </div>
+                    <span class="field__hint">Pick a preset or type any value from 1 to 600. The server enforces it; candidates can't extend it by refreshing.</span>
+                </div>
+            </div>
+
+            <div class="fsection">
+                <div class="fsection__title">Marking &amp; rules</div>
+                <div class="row">
+                    <div class="field"><label class="field__label" for="fPassing">Pass mark</label><input class="input num" type="number" id="fPassing" min="0" step="0.5" value="0"></div>
+                    <div class="field"><label class="field__label" for="fAttempts">Attempt limit</label><input class="input num" type="number" id="fAttempts" min="0" value="0"><span class="field__hint">0 means unlimited</span></div>
+                </div>
+                <div class="switches">
+                    <label class="switch"><input type="checkbox" id="fNegative"><span class="switch__track"></span><span class="switch__text"><strong>Negative marking</strong><span>Deduct each question's negative marks for wrong answers</span></span></label>
+                    <label class="switch"><input type="checkbox" id="fRandQ"><span class="switch__track"></span><span class="switch__text"><strong>Shuffle questions</strong><span>Each candidate gets a different order</span></span></label>
+                    <label class="switch"><input type="checkbox" id="fRandO"><span class="switch__track"></span><span class="switch__text"><strong>Shuffle options</strong><span>Mix up A to D per candidate</span></span></label>
+                </div>
+            </div>
+
+            <div class="fsection">
+                <div class="fsection__title">Availability <span class="faint" style="font-weight:600">Optional</span></div>
+                <div class="row">
+                    <div class="field"><label class="field__label" for="fStart">Opens at</label><input class="input" type="datetime-local" id="fStart"></div>
+                    <div class="field"><label class="field__label" for="fEnd">Closes at</label><input class="input" type="datetime-local" id="fEnd"></div>
+                </div>
+            </div>
+
+            <div class="fsection">
+                <div class="fsection__title">Instructions</div>
+                <div class="field"><label class="field__label" for="fInstructions">One instruction per line</label><textarea class="input" id="fInstructions" style="min-height:120px"></textarea></div>
+            </div>
+        </div>
+        <div class="modal__foot">
+            <button class="btn" type="button" data-close-modal>Cancel</button>
+            <button class="btn btn--primary" type="submit" id="quizSave"><i class="bi bi-check2 btn__icon"></i> Create examination</button>
+        </div>
+    </form>
+</div>
+
+<!-- ================= QUESTION EDITOR ================= -->
+<div class="modal modal--wide" id="questionModal" role="dialog" aria-modal="true" aria-labelledby="questionModalTitle" aria-hidden="true">
+    <form class="modal__box" id="questionForm" novalidate>
+        <div class="modal__head">
+            <div><h3 id="questionModalTitle">Add question</h3><p id="questionModalSub"></p></div>
+            <button class="btn btn--ghost btn--icon modal-close" type="button" data-close-modal aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal__body">
+            <div id="questionFormError"></div>
+            <div class="field"><label class="field__label" for="qText">Question</label><textarea class="input" id="qText" maxlength="2000" placeholder="Type the question"></textarea></div>
+
+            <div class="field">
+                <span class="field__label">Options <span class="faint">Click a letter to mark the correct answer</span></span>
+                <div class="opt-edit" id="optEdit"></div>
+            </div>
+
+            <div class="row">
+                <div class="field"><label class="field__label" for="qMarksIn">Marks</label><input class="input num" type="number" id="qMarksIn" min="0" step="0.5" value="1"></div>
+                <div class="field"><label class="field__label" for="qNeg">Negative marks</label><input class="input num" type="number" id="qNeg" min="0" step="0.25" value="0"><span class="field__hint" id="qNegHint"></span></div>
+                <div class="field"><label class="field__label" for="qDifficulty">Difficulty</label>
+                    <select class="input" id="qDifficulty"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></div>
+            </div>
+            <div class="field"><label class="field__label" for="qTopic">Topic <span class="faint">Optional, helps you search the bank</span></label><input class="input" id="qTopic" maxlength="80" placeholder="e.g. Mechanics"></div>
+            <div class="field"><label class="field__label" for="qExplain">Explanation <span class="faint">Optional, shown in the answer review</span></label><textarea class="input" id="qExplain" maxlength="2000" style="min-height:70px"></textarea></div>
+        </div>
+        <div class="modal__foot">
+            <button class="btn" type="button" data-close-modal>Cancel</button>
+            <button class="btn" type="button" id="questionSaveAnother">Save &amp; add another</button>
+            <button class="btn btn--primary" type="submit" id="questionSave"><i class="bi bi-check2 btn__icon"></i> Save question</button>
+        </div>
+    </form>
+</div>
+
+<!-- ================= PREVIEW ================= -->
+<div class="modal modal--wide" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewTitle" aria-hidden="true">
+    <div class="modal__box">
+        <div class="modal__head">
+            <div><h3 id="previewTitle">Preview</h3><p id="previewSub"></p></div>
+            <button class="btn btn--ghost btn--icon modal-close" type="button" data-close-modal aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal__body">
+            <label class="switch" style="padding-top:0"><input type="checkbox" id="previewAnswers"><span class="switch__track"></span><span class="switch__text"><strong>Show correct answers</strong><span>Candidates never see this during the exam</span></span></label>
+            <div id="previewBody"></div>
+        </div>
+        <div class="modal__foot" id="previewFoot"></div>
+    </div>
+</div>
+
+<!-- ================= USER DETAIL ================= -->
+<div class="modal modal--wide" id="userModal" role="dialog" aria-modal="true" aria-labelledby="userTitle" aria-hidden="true">
+    <div class="modal__box">
+        <div class="modal__head">
+            <div><h3 id="userTitle">Candidate</h3><p id="userSub"></p></div>
+            <button class="btn btn--ghost btn--icon modal-close" type="button" data-close-modal aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal__body" id="userBody"></div>
+    </div>
+</div>
+
+<!-- ================= LIVE CANDIDATE MONITORING ================= -->
+<div class="modal monitor" id="monitorModal" role="dialog" aria-modal="true" aria-labelledby="monitorTitle" aria-hidden="true" data-static="true">
+    <div class="modal__box">
+        <div class="modal__head">
+            <div style="display:flex;gap:14px;align-items:center;min-width:0">
+                <span class="avatar avatar--md" id="monitorAvatar"></span>
+                <div style="min-width:0">
+                    <div class="faint" id="monitorTitle" style="font-size:.74rem;font-weight:700;letter-spacing:.08em">LIVE CANDIDATE MONITORING</div>
+                    <h3 id="monitorName" style="margin-top:2px">Candidate</h3>
+                    <div class="monitor__meta">
+                        <span><i class="bi bi-journal-text"></i> <span id="monitorExam"></span></span>
+                        <span class="live-id" id="monitorId"></span>
+                        <span id="monitorConnTop"></span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn--ghost btn--icon modal-close" type="button" id="monitorCloseX" aria-label="Close monitoring"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal__body">
+            <div class="monitor__stage">
+                <video id="monitorVideo" autoplay playsinline></video>
+                <span class="monitor__badge hidden" id="monitorBadge">LIVE</span>
+                <div class="monitor__overlay" id="monitorOverlay"><div><div class="spinner"></div>Connecting...</div></div>
+            </div>
+            <div class="monitor__bar">
+                <div class="monitor__status">
+                    <span id="monitorCam"></span>
+                    <span id="monitorMic"></span>
+                    <span id="monitorConn"></span>
+                </div>
+                <div class="monitor__audio">
+                    <button class="btn btn--sm btn--amber hidden" type="button" id="monitorPlay"><i class="bi bi-volume-up"></i> Play sound</button>
+                    <div class="monitor__level" title="Incoming audio level"><span id="monitorLevel"></span></div>
+                    <button class="btn btn--ghost btn--icon btn--sm" type="button" id="monitorMute" aria-label="Mute candidate audio"><i class="bi bi-volume-up"></i></button>
+                    <input type="range" id="monitorVolume" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+                </div>
+            </div>
+        </div>
+        <div class="modal__foot">
+            <span class="faint" style="margin-right:auto;font-size:.82rem;align-self:center"><i class="bi bi-shield-lock"></i> Live only. Nothing is recorded.</span>
+            <button class="btn btn--primary" type="button" id="monitorClose"><i class="bi bi-x-circle btn__icon"></i> Close Monitoring</button>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/core.js"></script>
+<script src="js/proctor-admin.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

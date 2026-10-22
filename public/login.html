@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | Quiz App</title>
+    <meta name="description" content="Log in to take timed online examinations.">
+    <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");</script>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth">
+
+<main class="auth-layout">
+
+    <!-- LEFT: exam stage (hidden on small screens) -->
+    <section class="auth-stage" aria-hidden="true">
+        <div class="auth-stage__photo"></div>
+        <div class="auth-stage__shade"></div>
+
+        <div class="auth-stage__content">
+            <a class="brand brand--light" href="login.html"><span class="brand__mark"></span><span>Quiz App</span></a>
+
+            <div class="auth-stage__copy">
+                <h1>Sit the paper.<br>See where you stand.</h1>
+                <p>Timed, computer-based examinations with a live question palette, auto-save and results the moment you submit.</p>
+            </div>
+
+            <div class="sheet-demo">
+                <div class="sheet-demo__head">
+                    <span>Answer sheet</span>
+                    <span class="sheet-demo__timer num"><i class="bi bi-clock"></i> 29:45</span>
+                </div>
+                <div class="sheet-demo__rows" id="sheetDemo"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RIGHT: forms -->
+    <section class="auth-main">
+        <div class="auth-card panel">
+
+            <div class="auth-card__top">
+                <a class="brand auth-card__brand" href="login.html"><span class="brand__mark"></span><span>Quiz App</span></a>
+                <button class="btn btn--ghost btn--icon" type="button" data-toggle-theme aria-label="Switch colour theme"><i data-theme-icon></i></button>
+            </div>
+
+            <div class="segmented auth-tabs" role="tablist" aria-label="Login or register">
+                <button id="loginTab" class="is-active" type="button" role="tab" aria-selected="true" aria-controls="loginBox" onclick="showLogin()">Log in</button>
+                <button id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="registerBox" onclick="showRegister()">Create account</button>
+            </div>
+
+            <div id="authAlert" class="alert hidden" role="alert"></div>
+
+            <!-- LOGIN -->
+            <form id="loginBox" class="auth-form" novalidate autocomplete="on" role="tabpanel" aria-labelledby="loginTab">
+                <div class="auth-form__intro">
+                    <h2>Welcome back</h2>
+                    <p>Log in with the email you registered with.</p>
+                </div>
+
+                <div class="field" data-field="loginEmail">
+                    <label class="field__label" for="loginEmail">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input id="loginEmail" name="email" type="email" class="input" placeholder="you@example.com" autocomplete="username" inputmode="email" required>
+                    </div>
+                    <div class="field__error"></div>
+                </div>
+
+                <div class="field" data-field="loginPassword">
+                    <label class="field__label" for="loginPassword">Password</label>
+                    <div class="input-wrap has-action">
+                        <i class="bi bi-lock"></i>
+                        <input id="loginPassword" name="password" type="password" class="input" placeholder="Your password" autocomplete="current-password" required>
+                        <button type="button" class="input-action" data-reveal="loginPassword" aria-label="Show password"><i class="bi bi-eye"></i></button>
+                    </div>
+                    <div class="field__error"></div>
+                    <div class="caps-hint hidden" data-caps="loginPassword"><i class="bi bi-capslock"></i> Caps Lock is on</div>
+                </div>
+
+                <button id="loginButton" type="submit" class="btn btn--primary btn--lg btn--block">
+                    <i class="bi bi-box-arrow-in-right btn__icon"></i> Log in
+                </button>
+
+                <div class="or-line"><span>or</span></div>
+                <div class="social-stack">
+                    <div class="social-slot" id="googleLogin"></div>
+                    <button type="button" class="btn btn--block social-btn" id="codeLoginBtn"><i class="bi bi-envelope-paper"></i><span>Email me a sign-in code</span></button>
+                </div>
+
+                <p class="auth-form__foot">New here? <button type="button" class="link-btn" onclick="showRegister()">Create a candidate account</button></p>
+            </form>
+
+            <!-- SIGN IN WITH AN EMAIL CODE -->
+            <form id="codeBox" class="auth-form hidden" novalidate autocomplete="on" aria-labelledby="codeTitle">
+                <div class="auth-form__intro">
+                    <h2 id="codeTitle">Sign in with an email code</h2>
+                    <p id="codeIntro">No password needed. We'll send a 6-digit code to your email.</p>
+                </div>
+
+                <div class="field" data-field="codeEmail">
+                    <label class="field__label" for="codeEmail">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input id="codeEmail" name="email" type="email" class="input" placeholder="you@example.com" autocomplete="username" inputmode="email" required>
+                    </div>
+                    <div class="field__error"></div>
+                </div>
+
+                <div class="field hidden" data-field="codeValue" id="codeStep2">
+                    <label class="field__label" for="codeValue">6-digit code</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-key"></i>
+                        <input id="codeValue" name="code" type="text" class="input num code-input" placeholder="000000" autocomplete="one-time-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    <div class="field__error"></div>
+                    <div class="field__hint" style="margin-top:6px"><button type="button" class="link-btn" id="codeResend">Send a new code</button></div>
+                </div>
+
+                <button id="codeButton" type="submit" class="btn btn--primary btn--lg btn--block">
+                    <i class="bi bi-send btn__icon"></i> Send code
+                </button>
+
+                <p class="auth-form__foot"><button type="button" class="link-btn" onclick="showLogin()"><i class="bi bi-arrow-left"></i> Back to password login</button></p>
+            </form>
+
+            <!-- REGISTER -->
+            <form id="registerBox" class="auth-form hidden" novalidate autocomplete="on" role="tabpanel" aria-labelledby="registerTab">
+                <div class="auth-form__intro">
+                    <h2>Create your account</h2>
+                    <p>You'll use this to sit examinations and track your results.</p>
+                </div>
+
+                <div class="field" data-field="regName">
+                    <label class="field__label" for="regName">Full name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input id="regName" name="name" type="text" class="input" placeholder="As it should appear on results" autocomplete="name" maxlength="60" required>
+                    </div>
+                    <div class="field__error"></div>
+                </div>
+
+                <div class="field" data-field="regEmail">
+                    <label class="field__label" for="regEmail">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input id="regEmail" name="email" type="email" class="input" placeholder="you@example.com" autocomplete="email" inputmode="email" required>
+                    </div>
+                    <div class="field__error"></div>
+                </div>
+
+                <div class="field" data-field="regPassword">
+                    <label class="field__label" for="regPassword">Password</label>
+                    <div class="input-wrap has-action">
+                        <i class="bi bi-lock"></i>
+                        <input id="regPassword" name="password" type="password" class="input" placeholder="Create a password" autocomplete="new-password" required>
+                        <button type="button" class="input-action" data-reveal="regPassword" aria-label="Show password"><i class="bi bi-eye"></i></button>
+                    </div>
+                    <ul class="pw-rules" id="pwRules">
+                        <li data-rule="len">8 or more characters</li>
+                        <li data-rule="letter">A letter</li>
+                        <li data-rule="num">A number</li>
+                    </ul>
+                    <div class="field__error"></div>
+                </div>
+
+                <div class="field" data-field="regConfirm">
+                    <label class="field__label" for="regConfirm">Confirm password</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-shield-check"></i>
+                        <input id="regConfirm" name="confirm" type="password" class="input" placeholder="Type it again" autocomplete="new-password" required>
+                    </div>
+                    <div class="field__error"></div>
+                </div>
+
+                <!-- kept for compatibility with the original form; the server always registers candidates -->
+                <input type="hidden" id="regRole" value="user">
+
+                <button id="registerButton" type="submit" class="btn btn--primary btn--lg btn--block">
+                    <i class="bi bi-person-plus btn__icon"></i> Create account
+                </button>
+
+                <div class="or-line"><span>or</span></div>
+                <div class="social-stack">
+                    <div class="social-slot" id="googleRegister"></div>
+                </div>
+
+                <p class="auth-form__foot">Administrator accounts are created by your institution.</p>
+            </form>
+        </div>
+    </section>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/social.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

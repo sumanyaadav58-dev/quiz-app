@@ -1,0 +1,15 @@
+/* Sora and Manrope (SIL Open Font License), bundled locally so the app works offline */
+@font-face {
+    font-family: "Sora";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 800;
+    src: url("sora-latin-wght-normal.woff2") format("woff2-variations");
+}
+@font-face {
+    font-family: "Manrope";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 200 800;
+    src: url("manrope-latin-wght-normal.woff2") format("woff2-variations");
+}

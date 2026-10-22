@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Quiz App</title>
+    <script>document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark");</script>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+<header id="topnav"></header>
+
+<main class="page">
+
+    <section class="hero">
+        <div class="hero__intro panel">
+            <div>
+                <h1 id="greeting">Welcome back</h1>
+                <p id="heroText">Pick an examination below. Read the instructions first; the timer only starts when you begin.</p>
+            </div>
+            <div class="hero__actions">
+                <a class="btn btn--primary" href="#exams" id="heroCta"><i class="bi bi-pencil-square"></i> Browse examinations</a>
+                <a class="btn" href="leaderboard.html"><i class="bi bi-trophy"></i> Leaderboard</a>
+            </div>
+        </div>
+
+        <div class="clock panel" aria-label="Current date and time">
+            <span class="clock__ring" aria-hidden="true"></span>
+            <div class="clock__label"><span class="clock__dot"></span> Current time</div>
+            <div class="clock__time num" id="clockTime" aria-live="off">
+                <span id="clockH">00</span><span class="sep">:</span><span id="clockM">00</span><span class="clock__sec" id="clockS">00</span><span class="clock__ampm" id="clockAmPm"></span>
+            </div>
+            <div>
+                <div class="clock__date" id="clockDate">&nbsp;</div>
+                <div class="clock__zone" id="clockZone">&nbsp;</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats" id="stats" aria-label="Your performance">
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+        <div class="stat"><div class="skeleton" style="height:48px"></div></div>
+    </section>
+
+    <section id="exams" aria-labelledby="examsTitle">
+        <div class="section-head">
+            <div>
+                <h2 id="examsTitle">Available examinations</h2>
+                <p id="examsCount">Loading examinations</p>
+            </div>
+            <div class="toolbar">
+                <div class="input-wrap">
+                    <i class="bi bi-search"></i>
+                    <input id="examSearch" class="input" type="search" placeholder="Search examinations" aria-label="Search examinations">
+                </div>
+            </div>
+        </div>
+        <div class="chip-row" id="categoryChips" style="margin-bottom:16px"></div>
+        <div class="exam-grid" id="examGrid">
+            <div class="exam-card"><div class="skeleton" style="height:170px"></div></div>
+            <div class="exam-card"><div class="skeleton" style="height:170px"></div></div>
+            <div class="exam-card"><div class="skeleton" style="height:170px"></div></div>
+        </div>
+    </section>
+
+    <section class="split">
+        <div class="panel panel--pad">
+            <div class="panel__head">
+                <div><h3>Recent attempts</h3><p>Open one to see the full answer review.</p></div>
+                <a class="btn btn--sm btn--ghost" href="profile.html">View all</a>
+            </div>
+            <div class="list" id="recentList"><div class="skeleton" style="height:120px"></div></div>
+        </div>
+
+        <div class="panel panel--pad">
+            <div class="panel__head">
+                <div><h3>Top candidates</h3><p>Average of each candidate's best scores.</p></div>
+                <a class="btn btn--sm btn--ghost" href="leaderboard.html">Full board</a>
+            </div>
+            <div class="list" id="topList"><div class="skeleton" style="height:120px"></div></div>
+        </div>
+    </section>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>
